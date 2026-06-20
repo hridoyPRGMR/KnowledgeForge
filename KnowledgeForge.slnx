@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/KnowledgeForge.Api/KnowledgeForge.Api.csproj" />
+    <Project Path="src/KnowledgeForge.Application/KnowledgeForge.Application.csproj" />
+    <Project Path="src/KnowledgeForge.Domain/KnowledgeForge.Domain.csproj" />
+    <Project Path="src/KnowledgeForge.Infrastructure/KnowledgeForge.Infrastructure.csproj" />
+    <Project Path="src/KnowledgeForge.Worker/KnowledgeForge.Worker.csproj" />
+  </Folder>
+</Solution>

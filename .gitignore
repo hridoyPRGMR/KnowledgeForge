@@ -1,0 +1,67 @@
+## OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+## IDE
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.swp
+*.*~
+
+## .NET / ASP.NET Core
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.VisualState.xml
+TestResult.xml
+nupkg/
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+project.lock.json
+*.DotSettings.user
+publish/
+artifacts/
+
+## Frontend (Vite / React)
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+*.tsbuildinfo
+coverage/
+.eslintcache
+
+## Environment & secrets
+.env
+.env.*
+!.env.example
+
+## Project data
+data/
+*.pdf
+
+## Docker local overrides
+docker-compose.override.yml
