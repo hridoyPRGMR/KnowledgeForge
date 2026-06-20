@@ -1,5 +1,6 @@
 using KnowledgeForge.Application.Configuration;
 using KnowledgeForge.Application.Interfaces;
+using KnowledgeForge.Infrastructure.Ai;
 using KnowledgeForge.Infrastructure.Data;
 using KnowledgeForge.Infrastructure.Services;
 using MassTransit;
@@ -14,10 +15,11 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<OllamaOptions>(configuration.GetSection(OllamaOptions.SectionName));
         services.Configure<RagOptions>(configuration.GetSection(RagOptions.SectionName));
         services.Configure<StorageOptions>(configuration.GetSection(StorageOptions.SectionName));
         services.Configure<RabbitMqOptions>(configuration.GetSection(RabbitMqOptions.SectionName));
+
+        services.AddAiProviders(configuration);
 
         var postgresConnection = configuration.GetConnectionString("Postgres")
             ?? throw new InvalidOperationException("Postgres connection string is required.");
@@ -28,13 +30,6 @@ public static class DependencyInjection
         var redisConnection = configuration.GetConnectionString("Redis") ?? "localhost:6379";
         services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(redisConnection));
         services.AddSingleton<ICacheService, CacheService>();
-
-        services.AddHttpClient<IOllamaService, OllamaService>((sp, client) =>
-        {
-            var options = configuration.GetSection(OllamaOptions.SectionName).Get<OllamaOptions>() ?? new OllamaOptions();
-            client.BaseAddress = new Uri(options.BaseUrl);
-            client.Timeout = TimeSpan.FromMinutes(5);
-        });
 
         services.AddScoped<IRetrievalService, RetrievalService>();
         services.AddScoped<IPdfProcessingService, PdfProcessingService>();
@@ -49,6 +44,7 @@ public static class DependencyInjection
         services.AddScoped<INotesService, NotesService>();
         services.AddScoped<ILearningProfileService, LearningProfileService>();
         services.AddScoped<IKnowledgeGraphService, KnowledgeGraphService>();
+        services.AddScoped<IStorageService, LocalStorageService>();
 
         return services;
     }

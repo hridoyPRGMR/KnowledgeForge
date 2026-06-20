@@ -3,14 +3,14 @@ services:
     image: pgvector/pgvector:pg16
     environment:
       POSTGRES_DB: knowledgeforge
-      POSTGRES_USER: kf
-      POSTGRES_PASSWORD: kfpass
+      POSTGRES_USER: postgres 
+      POSTGRES_PASSWORD: root
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U kf -d knowledgeforge"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d knowledgeforge"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -57,10 +57,15 @@ services:
       - "8080:8080"
     environment:
       ASPNETCORE_URLS: http://+:8080
-      ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=knowledgeforge;Username=kf;Password=kfpass
+      ConnectionStrings__Postgres: Host=postgres;Port=5433;Database=knowledgeforge;Username=postgres;Password=root
       ConnectionStrings__Redis: redis:6379
       RabbitMQ__Host: rabbitmq
-      Ollama__BaseUrl: http://ollama:11434
+      Chat__Provider: Ollama
+      Chat__BaseUrl: http://ollama:11434
+      Chat__Model: qwen2.5:3b
+      Embeddings__Provider: Ollama
+      Embeddings__BaseUrl: http://ollama:11434
+      Embeddings__Model: nomic-embed-text
       Storage__BookPath: /data/books
     volumes:
       - book_data:/data/books
@@ -85,10 +90,15 @@ services:
       context: .
       dockerfile: src/KnowledgeForge.Worker/Dockerfile
     environment:
-      ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=knowledgeforge;Username=kf;Password=kfpass
+      ConnectionStrings__Postgres: Host=postgres;Port=5433;Database=knowledgeforge;Username=postgres;Password=root
       ConnectionStrings__Redis: redis:6379
       RabbitMQ__Host: rabbitmq
-      Ollama__BaseUrl: http://ollama:11434
+      Chat__Provider: Ollama
+      Chat__BaseUrl: http://ollama:11434
+      Chat__Model: qwen2.5:3b
+      Embeddings__Provider: Ollama
+      Embeddings__BaseUrl: http://ollama:11434
+      Embeddings__Model: nomic-embed-text
       Storage__BookPath: /data/books
     volumes:
       - book_data:/data/books

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KnowledgeForge.Infrastructure.Services;
 
-public class SummaryService(AppDbContext db, IOllamaService ollama, ICacheService cache) : ISummaryService
+public class SummaryService(AppDbContext db, IChatCompletionService chat, ICacheService cache) : ISummaryService
 {
     public async Task<SummaryDto?> GetSummaryAsync(Guid bookId, Guid chapterId, CancellationToken ct = default)
     {
@@ -40,7 +40,7 @@ public class SummaryService(AppDbContext db, IOllamaService ollama, ICacheServic
             {content}
             """;
 
-        var json = await ollama.GenerateJsonAsync(prompt, ct);
+        var json = await chat.GenerateJsonAsync(prompt, ct);
         json = CleanJson(json);
 
         using var doc = JsonDocument.Parse(json);

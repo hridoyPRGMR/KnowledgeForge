@@ -9,7 +9,7 @@ An AI-powered knowledge platform that transforms books into searchable, conversa
 - **PostgreSQL + pgvector** — Relational data and vector search
 - **Redis** — Chat answer caching
 - **RabbitMQ** — Async book processing queue
-- **Ollama** — Local LLM (Qwen 2.5 3B) and embeddings (nomic-embed-text)
+- **AI providers** — Pluggable chat and embedding backends (Ollama, OpenAI-compatible / llama.cpp, LM Studio, etc.)
 - **React** — Frontend SPA
 
 ## Prerequisites
@@ -96,7 +96,30 @@ frontend/                           # React SPA
 
 ## Configuration
 
-See `src/KnowledgeForge.Api/appsettings.json` for connection strings and Ollama settings.
+See `src/KnowledgeForge.Api/appsettings.json` for connection strings and AI provider settings.
+
+Chat and embeddings are configured independently under `Chat` and `Embeddings`. Each supports:
+
+| Provider | Use case |
+|----------|----------|
+| `Ollama` | Local Ollama server (default) |
+| `OpenAiCompatible` | llama.cpp server, LM Studio, vLLM, OpenAI, etc. |
+
+**All Ollama (default):**
+
+```json
+"Chat": { "Provider": "Ollama", "BaseUrl": "http://localhost:11434", "Model": "qwen2.5:3b" },
+"Embeddings": { "Provider": "Ollama", "BaseUrl": "http://localhost:11434", "Model": "nomic-embed-text" }
+```
+
+**llama.cpp for chat, Ollama for embeddings:**
+
+```json
+"Chat": { "Provider": "OpenAiCompatible", "BaseUrl": "http://localhost:8080", "Model": "my-model" },
+"Embeddings": { "Provider": "Ollama", "BaseUrl": "http://localhost:11434", "Model": "nomic-embed-text" }
+```
+
+Set `ApiKey` when the provider requires authentication.
 
 ## License
 

@@ -11,7 +11,7 @@ using Microsoft.Extensions.Options;
 
 namespace KnowledgeForge.Infrastructure.Services;
 
-public class KnowledgeGraphExtractionService(AppDbContext db, IOllamaService ollama) : IKnowledgeGraphExtractionService
+public class KnowledgeGraphExtractionService(AppDbContext db, IChatCompletionService chat) : IKnowledgeGraphExtractionService
 {
     public async Task ExtractGraphAsync(Guid bookId, CancellationToken ct = default)
     {
@@ -40,7 +40,7 @@ public class KnowledgeGraphExtractionService(AppDbContext db, IOllamaService oll
 
             try
             {
-                var json = await ollama.GenerateJsonAsync(prompt, ct);
+                var json = await chat.GenerateJsonAsync(prompt, ct);
                 json = CleanJson(json);
                 using var doc = JsonDocument.Parse(json);
                 var root = doc.RootElement;
@@ -123,8 +123,9 @@ public class KnowledgeGraphExtractionService(AppDbContext db, IOllamaService oll
 public class BookProcessingService(
     AppDbContext db,
     IPdfProcessingService pdfService,
-    IOllamaService ollama,
+    IEmbeddingService embeddings,
     IOptions<RagOptions> ragOptions,
+    IStorageService storageService,
     IBusPublisher busPublisher)
 {
     private readonly RagOptions _rag = ragOptions.Value;
@@ -140,7 +141,9 @@ public class BookProcessingService(
 
         try
         {
-            var extraction = await pdfService.ExtractAsync(filePath, _rag.ChunkSize, _rag.ChunkOverlap, ct);
+            await using var fileStream = await storageService.OpenReadAsync(filePath, ct);
+
+            var extraction = await pdfService.ExtractAsync(fileStream, _rag.ChunkSize, _rag.ChunkOverlap, ct);
             book.PageCount = extraction.PageCount;
 
             foreach (var chapterResult in extraction.Chapters)
@@ -175,7 +178,7 @@ public class BookProcessingService(
                     var slice = batch.Skip(i).Take(10).ToList();
                     foreach (var chunk in slice)
                     {
-                        chunk.Embedding = await ollama.GenerateEmbeddingAsync(chunk.Content, ct);
+                        chunk.Embedding = await embeddings.GenerateAsync(chunk.Content, ct);
                     }
                     db.BookChunks.AddRange(slice);
                     await db.SaveChangesAsync(ct);

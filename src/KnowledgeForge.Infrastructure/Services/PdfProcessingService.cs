@@ -8,9 +8,10 @@ namespace KnowledgeForge.Infrastructure.Services;
 
 public partial class PdfProcessingService : IPdfProcessingService
 {
-    public Task<PdfExtractionResult> ExtractAsync(string filePath, int chunkSize, int chunkOverlap, CancellationToken ct = default)
+    public Task<PdfExtractionResult> ExtractAsync(Stream pdfStream, int chunkSize, int chunkOverlap, CancellationToken ct = default)
     {
-        using var document = PdfDocument.Open(filePath);
+        // PdfDocument.Open safely accepts a Stream!
+        using var document = PdfDocument.Open(pdfStream);
         var pageCount = document.NumberOfPages;
         var pages = new List<(int PageNumber, string Text)>();
 

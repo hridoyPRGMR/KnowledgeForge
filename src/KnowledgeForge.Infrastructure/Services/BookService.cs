@@ -14,35 +14,37 @@ namespace KnowledgeForge.Infrastructure.Services;
 public class BookService(
     AppDbContext db,
     IBus bus,
-    IOptions<StorageOptions> storageOptions) : IBookService
+    IStorageService storageService) : IBookService
 {
-    private readonly StorageOptions _storage = storageOptions.Value;
 
     public async Task<BookDto> UploadBookAsync(Stream fileStream, string fileName, CancellationToken ct = default)
     {
-        Directory.CreateDirectory(_storage.BookPath);
-
+        // 1. Generate unique identifiers and safe names
         var bookId = Guid.NewGuid();
         var safeFileName = Path.GetFileName(fileName);
         var title = Path.GetFileNameWithoutExtension(safeFileName);
-        var filePath = Path.Combine(_storage.BookPath, $"{bookId}.pdf");
+        
+        // Define a universal storage path identifier (e.g., "books/guid.pdf")
+        var storagePath = $"{bookId}{Path.GetExtension(safeFileName)}";
 
-        await using (var fs = File.Create(filePath))
-        {
-            await fileStream.CopyToAsync(fs, ct);
-        }
+        // 2. Delegate the upload to the interface
+        // This will save to local disk OR Azure Blob depending on your settings!
+        await storageService.UploadFileAsync(storagePath, fileStream, ct);
 
+        // 3. Save metadata to the database
         var book = new Book
         {
             Id = bookId,
             Title = title,
-            FilePath = filePath,
+            FilePath = storagePath, // Save the logical path reference
             Status = BookStatus.Uploaded
         };
 
         db.Books.Add(book);
         await db.SaveChangesAsync(ct);
-        await bus.Publish(new BookUploadedEvent(bookId, filePath), ct);
+        
+        // 4. Publish event for any background processing
+        await bus.Publish(new BookUploadedEvent(bookId, storagePath), ct);
 
         return new BookDto(book.Id, book.Title, book.Status, book.PageCount, book.CreatedAt, 0);
     }

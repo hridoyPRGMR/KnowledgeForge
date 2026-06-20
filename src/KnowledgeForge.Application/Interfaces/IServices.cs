@@ -59,11 +59,15 @@ public interface IRetrievalService
     Task<IReadOnlyList<BookChunk>> SearchAcrossBooksAsync(IReadOnlyList<Guid> bookIds, Vector queryEmbedding, int topK, CancellationToken ct = default);
 }
 
-public interface IOllamaService
+public interface IChatCompletionService
 {
-    Task<Vector> GenerateEmbeddingAsync(string text, CancellationToken ct = default);
-    Task<string> GenerateChatAsync(string prompt, CancellationToken ct = default);
+    Task<string> GenerateAsync(string prompt, CancellationToken ct = default);
     Task<string> GenerateJsonAsync(string prompt, CancellationToken ct = default);
+}
+
+public interface IEmbeddingService
+{
+    Task<Vector> GenerateAsync(string text, CancellationToken ct = default);
 }
 
 public interface ICacheService
@@ -74,7 +78,7 @@ public interface ICacheService
 
 public interface IPdfProcessingService
 {
-    Task<PdfExtractionResult> ExtractAsync(string filePath, int chunkSize, int chunkOverlap, CancellationToken ct = default);
+    Task<PdfExtractionResult> ExtractAsync(Stream pdfStream, int chunkSize, int chunkOverlap, CancellationToken ct = default);
 }
 
 public record PdfExtractionResult(int PageCount, IReadOnlyList<PdfChapterResult> Chapters);
@@ -84,4 +88,10 @@ public record PdfChunkResult(int ChunkIndex, string Content, int TokenCount);
 public interface IKnowledgeGraphExtractionService
 {
     Task ExtractGraphAsync(Guid bookId, CancellationToken ct = default);
+}
+
+public interface IStorageService
+{
+    Task UploadFileAsync(string blobName, Stream fileStream, CancellationToken ct = default);
+    Task<Stream> OpenReadAsync(string blobName, CancellationToken ct = default);
 }

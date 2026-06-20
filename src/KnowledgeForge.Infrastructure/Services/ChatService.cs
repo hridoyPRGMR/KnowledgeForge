@@ -15,7 +15,8 @@ namespace KnowledgeForge.Infrastructure.Services;
 public class ChatService(
     AppDbContext db,
     IRetrievalService retrieval,
-    IOllamaService ollama,
+    IChatCompletionService chat,
+    IEmbeddingService embeddings,
     ICacheService cache,
     IOptions<RagOptions> ragOptions) : IChatService
 {
@@ -39,7 +40,7 @@ public class ChatService(
             return cachedResponse;
         }
 
-        var embedding = await ollama.GenerateEmbeddingAsync(request.Message, ct);
+        var embedding = await embeddings.GenerateAsync(request.Message, ct);
         var chunks = await retrieval.SearchAsync(bookId, embedding, _rag.TopK, ct);
 
         var context = string.Join("\n\n---\n\n", chunks.Select((c, i) => $"[{i + 1}] {c.Content}"));
@@ -52,7 +53,7 @@ public class ChatService(
             Question: {request.Message}
             """;
 
-        var answer = await ollama.GenerateChatAsync(prompt, ct);
+        var answer = await chat.GenerateAsync(prompt, ct);
 
         var conversation = request.ConversationId.HasValue
             ? await db.Conversations.FirstOrDefaultAsync(c => c.Id == request.ConversationId && c.BookId == bookId, ct)
@@ -97,7 +98,7 @@ public class ChatService(
             throw new InvalidOperationException("No ready books found for cross-book reasoning.");
         }
 
-        var embedding = await ollama.GenerateEmbeddingAsync(request.Message, ct);
+        var embedding = await embeddings.GenerateAsync(request.Message, ct);
         var chunks = await retrieval.SearchAcrossBooksAsync(request.BookIds, embedding, _rag.TopK * 2, ct);
 
         var graphContext = await BuildGraphContextAsync(request.BookIds, ct);
@@ -116,7 +117,7 @@ public class ChatService(
             Question: {request.Message}
             """;
 
-        var answer = await ollama.GenerateChatAsync(prompt, ct);
+        var answer = await chat.GenerateAsync(prompt, ct);
         var sources = chunks.Select(c => new CrossBookSourceDto(c.BookId, c.Book.Title, c.Id, c.Content, c.Chapter.Title)).ToList();
         return new CrossBookChatResponseDto(answer, sources);
     }

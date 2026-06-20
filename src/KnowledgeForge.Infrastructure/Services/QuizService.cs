@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KnowledgeForge.Infrastructure.Services;
 
-public class QuizService(AppDbContext db, IOllamaService ollama) : IQuizService
+public class QuizService(AppDbContext db, IChatCompletionService chat) : IQuizService
 {
     public async Task<QuizDto?> GetQuizAsync(Guid bookId, Guid chapterId, QuizType type, CancellationToken ct = default)
     {
@@ -45,7 +45,7 @@ public class QuizService(AppDbContext db, IOllamaService ollama) : IQuizService
             {content}
             """;
 
-        var json = await ollama.GenerateJsonAsync(prompt, ct);
+        var json = await chat.GenerateJsonAsync(prompt, ct);
         json = CleanJson(json);
 
         using var doc = JsonDocument.Parse(json);
