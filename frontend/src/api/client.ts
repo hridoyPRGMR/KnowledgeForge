@@ -1,9 +1,11 @@
+import type { BookStatus } from "../constants/bookStatus";
+
 export const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
 
 export interface Book {
   id: string;
   title: string;
-  status: 'Uploaded' | 'Processing' | 'Ready' | 'Failed';
+  status: typeof BookStatus[keyof typeof BookStatus];
   pageCount: number;
   createdAt: string;
   chapterCount: number;

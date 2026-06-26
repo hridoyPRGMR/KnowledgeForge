@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../api/client';
+import { BookStatusName } from '../constants/bookStatus';
 
 export default function Dashboard() {
   const { data: books, isLoading, error } = useQuery({ queryKey: ['books'], queryFn: api.getBooks });
@@ -36,7 +37,7 @@ export default function Dashboard() {
           {books?.map((book) => (
             <Link key={book.id} to={`/books/${book.id}`} className="book-card">
               <h3>{book.title}</h3>
-              <span className={`status status-${book.status.toLowerCase()}`}>{book.status}</span>
+              <span className={`status status-${BookStatusName[book.status]}`}>{BookStatusName[book.status]}</span>
               <p>{book.chapterCount} chapters · {book.pageCount} pages</p>
             </Link>
           ))}

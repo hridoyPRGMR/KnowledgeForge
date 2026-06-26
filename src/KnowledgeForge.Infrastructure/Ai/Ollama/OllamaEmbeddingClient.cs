@@ -20,15 +20,25 @@ public class OllamaEmbeddingClient(HttpClient httpClient, IOptions<EmbeddingOpti
 
     public async Task<Vector> GenerateAsync(string text, CancellationToken ct = default)
     {
-        var request = new { model = _options.Model, prompt = text };
-        var response = await httpClient.PostAsJsonAsync("/api/embeddings", request, JsonOptions, ct);
+        var request = new { model = _options.Model, input = text };
+        var response = await httpClient.PostAsJsonAsync("/v1/embeddings", request, JsonOptions, ct);
         response.EnsureSuccessStatusCode();
 
-        var result = await response.Content.ReadFromJsonAsync<EmbeddingResponse>(JsonOptions, ct)
-            ?? throw new InvalidOperationException("Empty embedding response from Ollama.");
+       var result = await response.Content.ReadFromJsonAsync<EmbeddingResponse>(cancellationToken: ct)
+            ?? throw new InvalidOperationException("Empty embedding response.");
 
-        return new Vector(result.Embedding);
+        if (result.Data.Length == 0)
+            throw new InvalidOperationException("No embedding returned.");
+
+        if (result.Data[0].Embedding.Length == 0)
+            throw new InvalidOperationException("Embedding is empty.");
+
+        return new Vector(result.Data[0].Embedding);
     }
 
-    private sealed record EmbeddingResponse(float[] Embedding);
+    private sealed record EmbeddingResponse(
+        [property: JsonPropertyName("data")] DataItem[] Data);
+
+    private sealed record DataItem(
+        [property: JsonPropertyName("embedding")] float[] Embedding);
 }

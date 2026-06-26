@@ -20,7 +20,7 @@ public class EmbeddingOptions
 {
     public const string SectionName = "Embeddings";
     public AiProvider Provider { get; set; } = AiProvider.Ollama;
-    public string BaseUrl { get; set; } = "http://localhost:11434";
+    public string BaseUrl { get; set; } = "http://localhost:8081";
     public string Model { get; set; } = "nomic-embed-text";
     public string ApiKey { get; set; } = string.Empty;
 }
