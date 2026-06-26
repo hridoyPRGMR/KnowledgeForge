@@ -1,0 +1,23 @@
+#remove old container name
+docker rm -f redis
+
+#stop container
+docker stop pgvector
+
+#run pgvector
+docker run -d --name pgvector -p 0.0.0.0:5433:5432 -e POSTGRES_PASSWORD=root  bd12d6788a61
+
+#run rabbitmq
+docker run -d --name my-rabbitmq -p 5672:5672 -p 15672:15672 id/name
+->
+-d: Runs the container in the background (detached mode).
+-p 5672:5672: Exposes the message broker port (for your applications).
+-p 15672:15672: Exposes the Management Web UI port.
+Username: guest
+Password: guest
+
+#run redis
+docker run -d --name redis -p 6380:6379 09160599abd2
+
+
+.\llama-server.exe --model .\models\nomic-embed-text-v1.5.Q5_K_M.gguf --embeddings --ctx-size 4096 -ub 1024 --port 8081

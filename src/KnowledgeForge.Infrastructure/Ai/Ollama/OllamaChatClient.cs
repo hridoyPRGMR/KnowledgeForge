@@ -25,7 +25,7 @@ public class OllamaChatClient(HttpClient httpClient, IOptions<ChatOptions> optio
             stream = false
         };
 
-        var response = await httpClient.PostAsJsonAsync("/api/chat", request, JsonOptions, ct);
+        var response = await httpClient.PostAsJsonAsync("/v1/chat/completions", request, JsonOptions, ct);
         response.EnsureSuccessStatusCode();
 
         var result = await response.Content.ReadFromJsonAsync<ChatResponse>(JsonOptions, ct)

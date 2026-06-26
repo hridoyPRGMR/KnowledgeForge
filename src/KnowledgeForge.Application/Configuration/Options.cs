@@ -11,7 +11,7 @@ public class ChatOptions
 {
     public const string SectionName = "Chat";
     public AiProvider Provider { get; set; } = AiProvider.Ollama;
-    public string BaseUrl { get; set; } = "http://localhost:11434";
+    public string BaseUrl { get; set; } = "http://localhost:8082";
     public string Model { get; set; } = "qwen2.5:3b";
     public string ApiKey { get; set; } = string.Empty;
 }
